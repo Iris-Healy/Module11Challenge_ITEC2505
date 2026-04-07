@@ -29,9 +29,10 @@ namespace MyApp.Namespace
         public IActionResult OnPost()
         {
             LoadAuthorsList();
-
+            //Check if Author is not null or empty
             if (!string.IsNullOrWhiteSpace(Author))
             {
+                //Execute method to retrieve books by selected author
                 GetBooksByAuthor(Author);
             }
 
@@ -110,6 +111,7 @@ namespace MyApp.Namespace
             }
         }
     }
+    //Book class storing attributes for display in Razor Page
     public class Book
     {
         public int Id {get; set;}
