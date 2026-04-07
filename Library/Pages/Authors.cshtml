@@ -1,0 +1,52 @@
+﻿@page
+@model MyApp.Namespace.AuthorsModel
+@{
+    ViewData["Title"] = "Lookup By Author";
+}
+<h1>@ViewData["Title"]</h1>
+<!-- Form for selecting an author from the dropdown list -->
+<form method="post">
+    <div class="form-group">
+        <label for="Author">Select Author:</label>
+        <select class="form-control" id="Author" name="Author">
+            <!-- Loop through the AuthorList to populate the dropdown options -->
+            @foreach (var author in Model.AuthorList)
+            {
+                <option value="@author.Text" selected="@(Model.Author == author.Text ? "selected" : null)">@author.Text</option>
+            }
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Search</button>
+</form>
+
+@if (Model.BookList != null && Model.BookList.Count > 0)
+{
+    <h2 class="mt-4">Books by @Model.Author</h2>
+    <table class="table table-striped table-bordered mt-2">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>ISBN</th>
+                <th>Author</th>
+                <th>Publication Year</th>
+                <th>Publisher</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var book in Model.BookList)
+            {
+                <tr>
+                    <td>@book.Title</td>
+                    <td>@book.ISBN</td>
+                    <td>@book.Author_First_Name @book.Author_Last_Name</td>
+                    <td>@book.Publication</td>
+                    <td>@book.Publisher</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else if (Model.BookList != null)
+{
+    <div class="alert alert-warning mt-4">No books were found for the selected author.</div>
+}
