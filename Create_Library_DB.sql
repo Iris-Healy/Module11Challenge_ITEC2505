@@ -1,4 +1,10 @@
-CREATE DATABASE IF NOT EXISTS Library;
+IF NOT EXISTS (
+    SELECT name
+        FROM sys.databases
+        WHERE name = N'Library'
+)
+CREATE DATABASE Library;
+GO
 
 USE Library;
 

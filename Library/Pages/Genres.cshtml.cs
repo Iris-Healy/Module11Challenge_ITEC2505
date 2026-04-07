@@ -7,56 +7,56 @@ using System.Diagnostics.Eventing.Reader;
 
 namespace MyApp.Namespace
 {
-    public class AuthorsModel : PageModel
+    public class GenresModel : PageModel
     {
-        // List that handles displaying DropdownList of authors
-        public List<SelectListItem> AuthorList { get; set; }
+        // List that handles displaying DropdownList of genres
+        public List<SelectListItem> GenreList { get; set; }
 
         // List storing retrieved book information from query
         public List<Book> BookList { get; set; }
 
-        // Bound value for the selected author last name
+        // Bound value for the selected genre
         [BindProperty]
-        public string Author { get; set; }
+        public string Genre { get; set; }
 
         public void OnGet()
         {
-            // Loads list of authors for database on page load
-            LoadAuthorsList();
+            // Loads list of genres for database on page load
+            LoadGenresList();
         }
 
-        // When user selects an author from dropdown list, retrieves books associated with that author
+        // When user selects a genre from dropdown list, retrieves books associated with that genre
         public IActionResult OnPost()
         {
-            LoadAuthorsList();
+            LoadGenresList();
 
-            if (!string.IsNullOrWhiteSpace(Author))
+            if (!string.IsNullOrWhiteSpace(Genre))
             {
-                GetBooksByAuthor(Author);
+                GetBooksByGenre(Genre);
             }
 
             return Page();
         }
-        //Helper method that loads list of authors from database
-        private void LoadAuthorsList()
+        //Helper method that loads list of genres from database
+        private void LoadGenresList()
         {
-            AuthorList = new List<SelectListItem>();
+            GenreList = new List<SelectListItem>();
             string connectionString = "Server=localhost;Database=Library;User Id=sa;Password=s3ntinal;TrustServerCertificate=True;";
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
-                string sql = "SELECT Author_ID, A_Last_Name FROM Authors;";
+                string sql = "SELECT Genre_ID, Genre FROM Genres;";
                 using (SqlCommand command = new SqlCommand(sql, connection))
                 {
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
                         while (reader.Read())
                         {
-                            AuthorList.Add(new SelectListItem
+                            GenreList.Add(new SelectListItem
                             {
-                                //Author_ID as Value
+                                //Genre_ID as Value
                                 Value = reader.GetInt32(0).ToString(),
-                                //Author LastName as Text
+                                //Genre as Text
                                 Text = reader.GetString(1)
                             });
                         }
@@ -64,8 +64,8 @@ namespace MyApp.Namespace
                 }
             }
         }
-        // Helper Method that retrieves List of Books By Parameterized Author
-        public void GetBooksByAuthor(string author)
+        // Helper Method that retrieves List of Books By Parameterized Genre
+        public void GetBooksByGenre(string genre)
         {
             BookList = new List<Book>();
             //Database ConnectionString
@@ -73,21 +73,26 @@ namespace MyApp.Namespace
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
-                //Sql Query retrieving book information based on selected author
+                //Sql Query retrieving book information based on selected genre
                 string sql = @"
                 SELECT b.Book_ID, b.BK_Title, b.ISBN,
-                    a.A_First_Name, a.A_Last_Name,
-                    b.BK_Publication_Year, p.P_Name
+                    g.Genre, a.A_First_Name, a.A_Last_Name, b.BK_Publication_Year, p.P_Name
                 FROM Books b
-                JOIN Book_Authors ba ON b.Book_ID = ba.Book_ID
-                JOIN Publishers p ON b.Publisher_ID = p.Publisher_ID
-                JOIN Authors a ON ba.Author_ID = a.Author_ID
-                WHERE a.A_Last_Name = @Author;";
+                JOIN Book_Genres bg 
+                  ON b.Book_ID = bg.Book_ID
+                JOIN Book_Authors ba 
+                  ON b.Book_ID = ba.Book_ID
+                JOIN Authors a
+                  ON ba.Author_ID = a.Author_ID
+                JOIN Publishers p
+                  ON b.Publisher_ID = p.Publisher_ID
+                JOIN Genres g ON bg.Genre_ID = g.Genre_ID
+                WHERE g.Genre = @Genre;";
 
                 using (SqlCommand command = new SqlCommand(sql, connection))
                 {
                     //Parameterized Query
-                    command.Parameters.AddWithValue("@Author", author);
+                    command.Parameters.AddWithValue("@Genre", genre);
 
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
@@ -99,26 +104,16 @@ namespace MyApp.Namespace
                                 Id = reader.GetInt32(0),
                                 Title = reader.GetString(1),
                                 ISBN = reader.GetString(2),
-                                Author_First_Name = reader.GetString(3),
-                                Author_Last_Name = reader.GetString(4),
-                                Publication = reader.GetString(5),
-                                Publisher = reader.GetString(6)
+                                Genre = reader.GetString(3),
+                                Author_First_Name = reader.GetString(4),
+                                Author_Last_Name = reader.GetString(5),
+                                Publication = reader.GetString(6),
+                                Publisher = reader.GetString(7)
                             });
                         }
                     }
                 }
             }
         }
-    }
-    public class Book
-    {
-        public int Id {get; set;}
-        public string Title {get; set;}
-        public string ISBN {get; set;}
-        public string Author_First_Name {get; set;}
-        public string Author_Last_Name {get; set;}
-        public string? Genre {get; set;}
-        public string Publication {get; set;}
-        public string Publisher {get; set;}
     }
 }
